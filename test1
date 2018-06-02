@@ -1,0 +1,91 @@
+import sqlite3
+
+import time
+
+class book():
+
+    def __init__(self,title,author,publisher,type,published):
+
+        self.title = title
+        self.author = author
+        self.publisher = publisher
+        self.type = type
+        self.published = published
+
+    def __str__(self):
+
+        return "Title: {}\nAuthor: {}\nPublisher: {}\nType: {}\nPublished: {}".format(self.title,self.author,self.publisher,self.type,self.published)
+
+class library():
+
+    def __init__(self):
+
+        self.create_connection()
+
+    def create_connection(self):
+
+        self.connect = sqlite3.connect("library.db")
+        self.cursor = self.connect.cursor()
+
+        query = "Create table if not exists books (title TEXT, author TEXT, publisher TEXT, type TEXT, published INT)"
+        self.cursor.execute(query)
+
+        self.connect.commit()
+
+    def disconnect(self):
+        self.connect.close()
+
+    def show_books(self):
+         query = "Select * From books"
+         self.cursor.execute(query)
+
+         books = self.cursor.fetchall()
+
+         if (len(books) == 0):
+             print("There are no books in the library")
+         else:
+             for i in books:
+                 book = book(i[0],i[1],i[2],i[3],i[4])
+                 print(book)
+
+    def ask_book(self,title):
+        query = "Select * From books Where title = ?"
+        self.cursor.execute(query,(title,))
+        books = self.cursor.fetchall()
+
+        if (len(books)==0):
+            print("That book is not here")
+        else:
+            book = book(books[0][0],books[0][1],books[0][2],books[0][3],books[0][4])
+            print(book)
+
+    def add_book(self,book):
+
+        query = "Insert into books Values(?,?,?,?,?)"
+
+        self.cursor.execute(query, (book.title,book.author,book.publisher,book.type,book.published   ))
+        self.connect.commit()
+
+    def delete_book(self,title):
+
+        query = "Delete From books Where title = ?"
+        self.cursor.execute(query, (title,))
+        self.connect.commit(
+
+    def published_(self,title):
+        query = "Select * from books where title = ?"
+
+        self.cursor.execute(query, (title,))
+
+        books = self.cursor.fetchall()
+
+        if (len(books)==0):
+            print("That book is not in the library")
+        else:
+            published = books[0][4]
+            published += 1
+
+            query2 = "Update Books set published = ? Where title = ?"
+
+        self.cursor.execute(query2, (published,title))
+        self.connect.commit()
